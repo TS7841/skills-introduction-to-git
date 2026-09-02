@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Competency Matrix</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --border: #dfe7f5;
+      --text: #1f2a37;
+      --muted: #5c6b7a;
+      --tech: #2a7ae2;
+      --lead: #1f9d8a;
+      --ai: #8a5cf6;
+      --good: #1f9d8a;
+      --warn: #e9a13b;
+      --gap: #d95d5d;
+      --shadow: 0 8px 24px rgba(28, 40, 62, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Segoe UI, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 20px 40px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 2vw, 2.6rem);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.98rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: white;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.15s ease;
+    }
+
+    .chip.active {
+      background: #eaf2ff;
+      border-color: #bfd5ff;
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f3f6fb;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    tbody tr:hover {
+      background: #fafcff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .tech { background: rgba(42,122,226,0.12); color: var(--tech); }
+    .lead { background: rgba(31,157,138,0.12); color: var(--lead); }
+    .ai { background: rgba(138,92,246,0.12); color: var(--ai); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      background: #edf3ff;
+      color: #1d4ed8;
+    }
+
+    .scorebar {
+      position: relative;
+      height: 10px;
+      width: min(220px, 100%);
+      background: #edf2f7;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .scorebar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #6ca5ff, #2a7ae2);
+    }
+
+    .gap-badge {
+      font-weight: 700;
+      color: var(--gap);
+    }
+
+    .current-strong { color: var(--good); }
+    .current-mid { color: var(--warn); }
+
+    @media (max-width: 760px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead { display: none; }
+      tr {
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+      }
+      td {
+        border: none;
+        padding: 8px 14px;
+      }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.72rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Competency Matrix</h1>
+        <div class="subtitle">Current state, target state, and gap analysis across technical, leadership, and AI domains</div>
+      </div>
+      <div class="controls" id="filters"></div>
+    </div>
+
+    <div class="summary">
+      <div class="card">
+        <div class="metric-label">Average Current</div>
+        <div class="metric-value" id="avgCurrent">0.0</div>
+      </div>
+      <div class="card">
+        <div class="metric-label">Average Target</div>
+        <div class="metric-value" id="avgTarget">0.0</div>
+      </div>
+      <div class="card">
+        <div class="metric-label">Average Gap</div>
+        <div class="metric-value" id="avgGap">0.0</div>
+      </div>
+      <div class="card">
+        <div class="metric-label">Strongest Area</div>
+        <div class="metric-value" id="strongest">—</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Competency</th>
+          <th>Category</th>
+          <th>Current</th>
+          <th>Target</th>
+          <th>Gap</th>
+          <th>Priority</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const rows = [
+      { competency: 'Equipment Engineering Fundamentals', category: 'Technical', current: 5, target: 5, gap: 0, priority: 'Critical', notes: 'Strong domain depth in engineering design and execution.' },
+      { competency: 'Order Accuracy / Quality Management', category: 'Technical', current: 5, target: 5, gap: 0, priority: 'Critical', notes: 'Excellent in backlog and quality discipline.' },
+      { competency: 'Backlog and Workflow Management', category: 'Technical', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Strong baseline; could increase with predictive prioritization.' },
+      { competency: 'Vendor Coordination / Escalation Management', category: 'Technical', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Good escalation capability; build broader proactive management.' },
+      { competency: 'Executive Communication', category: 'Leadership', current: 5, target: 5, gap: 0, priority: 'Critical', notes: 'Strong executive-ready communication style.' },
+      { competency: 'Cross-Functional Influence', category: 'Leadership', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Coaching and committee work show strong influence.' },
+      { competency: 'M365 Copilot Productivity', category: 'AI', current: 5, target: 5, gap: 0, priority: 'Critical', notes: 'Excellent practical productivity capability.' },
+      { competency: 'Copilot Studio / Agent Building', category: 'AI', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Strong foundation with more advanced solution design potential.' },
+      { competency: 'Power Automate / Workflow Automation', category: 'AI', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Automation potential is clear and scalable.' },
+      { competency: 'Power BI / Data Visualization', category: 'AI', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Good analytics foundation; deepen metric strategy.' },
+      { competency: 'SQL / Data Querying', category: 'AI', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Strong fundamentals; more advanced data patterns would elevate impact.' },
+      { competency: 'GenAI Prompting / Grounding', category: 'AI', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Good grounding approach; goal is more advanced orchestration.' },
+      { competency: 'Responsible AI / Governance', category: 'AI', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Guardrails and CPNI awareness are present.' },
+      { competency: 'Change Leadership / AI Adoption', category: 'Leadership', current: 5, target: 5, gap: 0, priority: 'Critical', notes: 'Strong adoption and coaching capability.' },
+      { competency: 'Strategic Thinking / Business Impact', category: 'Leadership', current: 4, target: 5, gap: 1, priority: 'High', notes: 'Good domain-to-business insight; evolve ROI framing.' }
+    ];
+
+    const filters = ['All', 'Technical', 'Leadership', 'AI'];
+    const filterEl = document.getElementById('filters');
+    const tableBody = document.getElementById('tableBody');
+
+    function renderFilters(selected = 'All') {
+      filterEl.innerHTML = filters.map(filter => {
+        const active = filter === selected ? 'active' : '';
+        return `<button class="chip ${active}" data-filter="${filter}">${filter}</button>`;
+      }).join('');
+
+      filterEl.querySelectorAll('.chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          renderTable(btn.dataset.filter);
+          renderFilters(btn.dataset.filter);
+        });
+      });
+    }
+
+    function getFilteredRows(filter = 'All') {
+      return filter === 'All' ? rows : rows.filter(r => r.category === filter);
+    }
+
+    function renderTable(filter = 'All') {
+      const filtered = getFilteredRows(filter);
+      tableBody.innerHTML = filtered.map(row => {
+        const currentClass = row.current >= 4 ? 'current-strong' : 'current-mid';
+        const barWidth = (row.current / 5) * 100;
+        return `
+          <tr>
+            <td data-label="Competency"><strong>${row.competency}</strong></td>
+            <td data-label="Category"><span class="badge ${row.category === 'Technical' ? 'tech' : row.category === 'Leadership' ? 'lead' : 'ai'}">${row.category}</span></td>
+            <td data-label="Current"><span class="pill ${currentClass}">${row.current}</span></td>
+            <td data-label="Target">${row.target}</td>
+            <td data-label="Gap"><span class="gap-badge">${row.gap}</span></td>
+            <td data-label="Priority">${row.priority}</td>
+            <td data-label="Notes">${row.notes}<div class="scorebar"><span style="width:${barWidth}%"></span></div></td>
+          </tr>
+        `;
+      }).join('');
+
+      updateSummary(filtered);
+    }
+
+    function updateSummary(filtered) {
+      const avgCurrent = filtered.reduce((sum, r) => sum + r.current, 0) / filtered.length;
+      const avgTarget = filtered.reduce((sum, r) => sum + r.target, 0) / filtered.length;
+      const avgGap = filtered.reduce((sum, r) => sum + r.gap, 0) / filtered.length;
+
+      document.getElementById('avgCurrent').textContent = avgCurrent.toFixed(1);
+      document.getElementById('avgTarget').textContent = avgTarget.toFixed(1);
+      document.getElementById('avgGap').textContent = avgGap.toFixed(1);
+
+      const strongest = filtered.slice().sort((a, b) => (b.current - b.target) - (a.current - a.target))[0];
+      document.getElementById('strongest').textContent = strongest ? strongest.competency : '—';
+    }
+
+    renderFilters();
+    renderTable();
+  </script>
+</body>
+</html>
