@@ -44,6 +44,7 @@ let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
 let targetPattern = null;
+let needsRedraw = true;
 
 // Initialize game
 function init() {
@@ -83,7 +84,9 @@ function gameLoop(time = 0) {
     }
   }
 
-  draw();
+  if (needsRedraw) {
+    draw();
+  }
   requestAnimationFrame(gameLoop);
 }
 
@@ -122,6 +125,8 @@ function draw() {
     ctx.lineTo(col * BLOCK_SIZE, ROWS * BLOCK_SIZE);
     ctx.stroke();
   }
+
+  needsRedraw = false;
 }
 
 // Draw a single block
@@ -180,10 +185,12 @@ function checkCollision(piece, x, y) {
 function moveDown() {
   if (!checkCollision(currentPiece, currentX, currentY + 1)) {
     currentY++;
+    needsRedraw = true;
   } else {
     lockPiece();
     checkPatternMatch();
     spawnPiece();
+    needsRedraw = true;
   }
 }
 
@@ -208,6 +215,7 @@ function rotate() {
 
   if (!checkCollision(rotated, currentX, currentY)) {
     currentPiece = rotated;
+    needsRedraw = true;
   }
 }
 
@@ -215,6 +223,7 @@ function rotate() {
 function moveLeft() {
   if (!checkCollision(currentPiece, currentX - 1, currentY)) {
     currentX--;
+    needsRedraw = true;
   }
 }
 
@@ -222,6 +231,7 @@ function moveLeft() {
 function moveRight() {
   if (!checkCollision(currentPiece, currentX + 1, currentY)) {
     currentX++;
+    needsRedraw = true;
   }
 }
 
@@ -233,6 +243,7 @@ function hardDrop() {
   lockPiece();
   checkPatternMatch();
   spawnPiece();
+  needsRedraw = true;
 }
 
 // Set new target pattern
